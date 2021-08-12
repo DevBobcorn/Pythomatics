@@ -1,4 +1,4 @@
 # LuoGu
 
-#### Introduction
+### Introduction
 Solutions to problems on LuoGu.
