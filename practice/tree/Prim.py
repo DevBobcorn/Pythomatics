@@ -43,7 +43,8 @@ while visnum < pts:
     result.append(sel)
 
 # 3. Output the result
-print(result)
+for rd in result:
+    print(rd)
 
 '''
 Test Data
