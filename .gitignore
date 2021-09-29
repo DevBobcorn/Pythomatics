@@ -1,0 +1,3 @@
+# ignore downloaded files...
+web/downloaded
+web/list.txt
