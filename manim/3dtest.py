@@ -1,4 +1,3 @@
-from turtle import up
 from manim import *
 
 class Test02(ThreeDScene):
