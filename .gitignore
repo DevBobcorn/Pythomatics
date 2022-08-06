@@ -1,3 +1,7 @@
 # ignore downloaded files...
 web/downloaded
 web/list.txt
+
+# ignore manim generated files...
+manim/media
+manim/__pycache__
