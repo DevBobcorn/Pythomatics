@@ -5,12 +5,6 @@ class ThreeDTest(ThreeDScene):
         # Initialize 3D axis and camera
         self.set_camera_orientation(phi=0, theta=0)
 
-        '''test = Square(side_length=1, fill_opacity = 0)
-        test.stroke_width = 1
-        test.stroke_color=WHITE
-        self.add(test)
-        test.get_vertices()'''
-
         face_data = [
             ([ 0, 0, 1],   0,  OUT),
             ([ 0, 0,-1],   0,  OUT),
@@ -55,16 +49,10 @@ class ThreeDTest(ThreeDScene):
             (180,   UP, '右')
         ]
 
-        texto = Text('在Minecraft中,最基本的模型便是立方体', font_size=32)
-        text1 = Text('那么问题来了,一个这样的立方体有几个顶点?', font_size=32)
-        text2 = Text('8个?', font_size=32)
-        text3 = Text('不,其实是24个', font_size=32)
-        text4 = Text('为什么呢?', font_size=32)
-        text5 = Text('我们知道,MC中的方块每个面都是带有纹理的', font_size=32)
-        text6 = Text('而纹理坐标,也就是uv,是保存在顶点信息中的', font_size=32)
+        cube_text = Text('这是在Minecraft中最基本的图形', font_size=32)
 
-        self.add_fixed_in_frame_mobjects(texto)
-        texto.to_corner(UL)
+        self.add_fixed_in_frame_mobjects(cube_text)
+        cube_text.to_corner(UL)
 
         for i in range(6):
             square_texts.append(Text(text_data[i][2], color=WHITE, fill_opacity=1))
@@ -72,7 +60,7 @@ class ThreeDTest(ThreeDScene):
             square_texts[i].rotate(face_data[i][1] * DEGREES, face_data[i][2])
             square_texts[i].rotate(text_data[i][0] * DEGREES, text_data[i][1])
 
-        self.play(Create(square_original[0]), FadeIn(texto))
+        self.play(Create(square_original[0]), FadeIn(cube_text))
         self.play(Create(square_original[1]))
         self.play(Create(square_original[2]), Create(square_original[3]), Create(square_original[4]), Create(square_original[5]))
 
@@ -105,14 +93,15 @@ class ThreeDTest(ThreeDScene):
 
         self.set_camera_orientation(phi=75 * DEGREES, theta=60 * DEGREES)
 
-        text1.to_corner(UL)
-        self.play(Transform(texto, text1))
+        question_text = Text('它有几个顶点?', font_size=32)
+        question_text.to_corner(UL)
+        self.play(Transform(cube_text, question_text))
         self.wait()
 
-        # TEXT: Eight?
-        text2.to_corner(UL)
+        answer_text = Text('8个?')
+        self.add_fixed_in_frame_mobjects(answer_text)
         anims = [] # Show the 8 vertices...
-        anims.append(Transform(texto, text2)) # Update text
+        anims.append(FadeOut(cube_text)) # Alter texts...
         visual_dots = []
         for vert in square_original[0].get_vertices(): # 4 vertices on top face
             d = Dot(point=vert, color=BLUE)
@@ -124,20 +113,20 @@ class ThreeDTest(ThreeDScene):
             visual_dots.append(d)
         for d in visual_dots:
             anims.append(FadeIn(d))
+        anims.append(Write(answer_text)) # Show text
         self.play(*anims)
         self.wait()
 
-        # TEXT: No, actually there're 24
-        text3.to_corner(UL)
         anims = [] # Tear these faces apart
         # Fade out previous 8 dots
         for d in visual_dots:
             anims.append(FadeOut(d))
+        anims.append(Unwrite(answer_text))
         for face1, face2 in zip(square_original, square_changed):
             anims.append(Transform(face1, face2))
-        anims.append(Transform(texto, text3))
         self.play(*anims)
-        self.wait(0.2)
+        self.wait()
+
         visual_dots = []
         for face in square_original: # Add all 24 vertices
             for vert in face.get_vertices():
@@ -147,17 +136,28 @@ class ThreeDTest(ThreeDScene):
         anims = [] # Show 24 vertices on the torn cube
         for d in visual_dots:
             anims.append(FadeIn(d))
+        answer_text_correct = Text('不, 其实是24个')
+        answer_text_correct.shift(DOWN * 3)
+        self.add_fixed_in_frame_mobjects(answer_text_correct)
+        anims.append(Write(answer_text_correct))
         self.play(*anims)
-        self.wait(0.5)
+        self.wait()
 
-        # TEXT: Why?
+        for d in visual_dots:
+            anims.append(FadeOut(d))
         anims = [] # Clear 24 vertices on the torn cube
         for d in visual_dots:
             anims.append(FadeOut(d))
-        text4.to_corner(UL)
-        anims.append(Transform(texto, text4))
+        anims.append(FadeOut(answer_text))
         self.play(*anims)
-        self.wait(0.5)
+        self.wait()
+        why_text = Text('为什么呢？')
+        why_text.shift(DOWN * 3)
+        self.add_fixed_in_frame_mobjects(why_text)
+        self.play(FadeOut(answer_text_correct), FadeIn(why_text))
+        self.wait()
+        self.play(Unwrite(why_text))
+        #self.wait()
         
         anims = [] # Then stitch the faces back
         for face1, face2 in zip(square_original, square_backup):
@@ -173,8 +173,7 @@ class ThreeDTest(ThreeDScene):
         #self.begin_3dillusion_camera_rotation(rate=-1)
         self.begin_3dillusion_camera_rotation()
         anims = [] # Show and explain textures
-        text5.to_corner(UL)
-        anims.append(Transform(texto, text5))
+        anims.append(FadeOut(answer_text))
 
         for t in square_texts:
             anims.append(FadeIn(t))
@@ -184,11 +183,50 @@ class ThreeDTest(ThreeDScene):
         #group = VGroup(*sq2)
         #self.play(group.animate(lag_ratio=0.1, run_time=1).rotate(PI))
 
-        text6.to_corner(UL)
-        self.play(Transform(texto, text6))
-        self.wait(1)
+        self.wait(3)
+        self.stop_3dillusion_camera_rotation()
 
-        #self.stop_3dillusion_camera_rotation()
+        # TEMP SETUP
+        #self.set_camera_orientation(phi=75 * DEGREES, theta=60 * DEGREES)
+        #self.add(Cube())
+
+        sampleDot = Dot(np.array([1, 1, 1]))
+        self.add_fixed_orientation_mobjects(sampleDot)
+        self.play(FadeIn(sampleDot))
+
+        # Set up front and right face for demonstration
+        front_face = Square(side_length=2, color=YELLOW, fill_opacity=0.5)
+        # Slightly offset a bit more, so that it won't get stuck in cube face
+        front_face.move_to(np.multiply(1.01, np.array(face_data[2][0])))
+        front_face.rotate(face_data[2][1] * DEGREES, face_data[2][2])
+        front_face.stroke_color = WHITE
+        front_face.stroke_width = 2
+        front_text = Text('在前方的面上，这个点对应贴图的右上角\n它的UV坐标是（1，1）', font_size=36, color=WHITE, fill_opacity=1)
+        front_text.rotate(face_data[2][1] * DEGREES, face_data[2][2])
+        front_text.rotate(text_data[2][0] * DEGREES, text_data[2][1])
+        front_text.move_to(np.array(np.array([0, 2, 2])))
+
+        right_face = Square(side_length=2, color=YELLOW, fill_opacity=0.5)
+        # Slightly offset a bit more, so that it won't get stuck in cube face
+        right_face.move_to(np.multiply(1.01, np.array(face_data[5][0])))
+        right_face.rotate(face_data[5][1] * DEGREES, face_data[5][2])
+        right_face.stroke_color = WHITE
+        right_face.stroke_width = 2
+        right_text = Text('而右面的此点对应贴图的左上角\n它的UV坐标则是（0，1）', font_size=36, color=WHITE, fill_opacity=1)
+        right_text.rotate(face_data[5][1] * DEGREES, face_data[5][2])
+        right_text.rotate(text_data[5][0] * DEGREES, text_data[5][1])
+        right_text.move_to(np.array(np.array([-5, 1, 1])))
+
+        self.play(Create(front_face))
+        self.wait()
+        self.play(Create(front_text))
+        self.wait(4)
+        self.play(FadeOut(front_text), Transform(front_face, right_face))
+        self.wait()
+        self.play(Create(right_text))
+        self.wait(4)
+        self.play(FadeOut(front_face))
+        self.wait()
 
         # Move camera further to show a wider area
         #self.move_camera(phi=1, zoom=0.5)
