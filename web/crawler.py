@@ -50,29 +50,37 @@ def getPage(path):
     if resp.status_code == 200:
         # Ready
         ful = BeautifulSoup(resp.text, features="html.parser")
-        bod = ful.body
+        bod = ful.body.find(name='div',attrs={'class':'main'}).find(name='div',attrs={'class':'main_inner'}).find(name='div',attrs={'class':'main_left'})
 
         cont = None
+        navc = None
 
         for el in bod.contents:
             if type(el) == bs4.element.Tag and 'class' in el.attrs:
-                if el.attrs['class'] == ['nr3']:
-                    cont = el
+                if el.attrs['class'] == ['content']:
+                    # Try find image container
+                    imgCont = el.find(name='p')
+                    if imgCont != None and cont == None:
+                        cont = imgCont
+                    # Try find navigation button container
+                    navCont = el.find(name='div', attrs={'class':'content_left'})
+                    if navCont != None and navc == None:
+                        navc = navCont.find(name='div', attrs={'class':'page'})
 
         if cont != None:
+            print("Images found on " + path + ":")
             # Process Images...
-            for iel in cont.findAll(name='div',attrs={'class':'img'}):
+            for img in cont.findAll(name='img'):
                 # For each image container
-                print("Images found on " + path + ":")
-                for img in iel.findAll(name='img'):
-                    print(img.attrs['src'])
-                    getImage(root + img.attrs['src'])
+                print(img.attrs['src'])
+                getImage(root + img.attrs['src'])
+
+        if navc != None:
             # Process Navigation Links...
-            for tel in cont.findAll(name='div',attrs={'class':'page'}):
-                for lnk in tel.contents:
-                    if lnk.attrs['href'] not in lnx:
-                        lnx[lnk.attrs['href']] = False
-                        print('New link found: ' + lnk.attrs['href'])
+            for lnk in navc.findAll(name='a'):
+                if 'href' in lnk.attrs.keys() and lnk.attrs['href'] not in lnx:
+                    lnx[lnk.attrs['href']] = False
+                    print('New link found: ' + lnk.attrs['href'])
         else:
             print("Main content cannot be found!")
     else:
