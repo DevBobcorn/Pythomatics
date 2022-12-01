@@ -1,10 +1,11 @@
-import requests, base64, bs4, os
+import requests, base64, bs4, os, ssl
 from bs4 import BeautifulSoup
 
 # First get the full URL
-domain = "xi" + base64.b64decode("VXJl").decode("utf-8") + "n" + chr(106) + "i.v"
+domain = "xi" + base64.b64decode("VXJl").decode("utf-8") + "nb."
 folder = base64.b64decode("L1hpdVJlbi8=").decode("utf-8")
-root = "https://www." + domain + "ip"
+root = "https://www." + domain + "vip"
+picroot = "https://p." + domain + "top"
 
 curidx = 0
 lnx = {}
@@ -12,6 +13,8 @@ imgcnt = 0
 
 def getImage(url):
     global curidx, imgcnt
+
+    #ssl.match_hostname = lambda cert, hostname: True
     resp = requests.get(url, stream=True)
     resp.encoding = resp.apparent_encoding
 
@@ -43,7 +46,8 @@ def getPage(path):
     global lnx
     if path not in lnx or not lnx[path]: # Short-circuit logic here
         lnx[path] = True
-    
+
+    #ssl.match_hostname = lambda cert, hostname: True
     resp = requests.get(root + path)
     resp.encoding = resp.apparent_encoding
 
@@ -74,6 +78,9 @@ def getPage(path):
                 # For each image container
                 print(img.attrs['src'])
                 getImage(root + img.attrs['src'])
+            # Sleep for a short period of time so that
+            # We ain't gonna be blocked
+            time.sleep(4)
 
         if navc != None:
             # Process Navigation Links...
@@ -90,6 +97,10 @@ with open(r'list.txt') as f:
     lnz = f.readlines()
     cnt = 0
     for ln in lnz:
+        ln = ln.strip()
+        if ln == '':
+            continue
+        
         cnt = cnt + 1
         idxs = ln.strip().split(' ', 2)
         idx = idxs[1].replace('+','').replace('*','')
