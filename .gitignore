@@ -8,4 +8,6 @@ web/list-.txt
 manim/media
 manim/__pycache__
 
-animagic/*
+fileproc/res
+fileproc/src
+fileproc/tmp
