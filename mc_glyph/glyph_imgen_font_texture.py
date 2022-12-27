@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+enableBlending = False
+
 unitW = 4
 unitH = 3
 
@@ -51,10 +53,12 @@ def GetNeighborPosIndexMapping():
 
 neighborPosIndexMapping = GetNeighborPosIndexMapping()
 
-textureA = cv2.imread('mc_glyph\\apple.png', cv2.IMREAD_UNCHANGED)
-textureB = cv2.imread('mc_glyph\\golden_apple.png', cv2.IMREAD_UNCHANGED)
 #textureA = cv2.imread('mc_glyph\\diamond_block.png', cv2.IMREAD_UNCHANGED)
 #textureB = cv2.imread('mc_glyph\\emerald_block.png', cv2.IMREAD_UNCHANGED)
+#textureA = cv2.imread('mc_glyph\\apple.png', cv2.IMREAD_UNCHANGED)
+#textureB = cv2.imread('mc_glyph\\golden_apple.png', cv2.IMREAD_UNCHANGED)
+textureA = cv2.imread('mc_glyph\\white.png', cv2.IMREAD_UNCHANGED)
+textureB = cv2.imread('mc_glyph\\black.png', cv2.IMREAD_UNCHANGED)
 
  # Flip the images both vertically and horizontally
 textureA = textureA.transpose(1, 0, 2)
@@ -100,30 +104,34 @@ for ih in range(64):
                             else:
                                 blendFactor = 0.0
                             
-                            # If this pixel is on the 
-                            if pxx == 0:
-                                if ((glyphIndex >> GetClampedPosIndex(ix - 1, iy)) & 1) != 0:
-                                    blendFactor += 0.4
-                                else:
-                                    blendFactor -= 0.4
-                            elif pxx == pixelSize - 1:
-                                if ((glyphIndex >> GetClampedPosIndex(ix + 1, iy)) & 1) != 0:
-                                    blendFactor += 0.4
-                                else:
-                                    blendFactor -= 0.4
+                            if enableBlending:
+                                # Check horizontal neighbors
+                                if pxx == 0:
+                                    if ((glyphIndex >> GetClampedPosIndex(ix - 1, iy)) & 1) != 0:
+                                        blendFactor += 0.4
+                                    else:
+                                        blendFactor -= 0.4
+                                elif pxx == pixelSize - 1:
+                                    if ((glyphIndex >> GetClampedPosIndex(ix + 1, iy)) & 1) != 0:
+                                        blendFactor += 0.4
+                                    else:
+                                        blendFactor -= 0.4
+                                
+                                # Check vertical neighbors
+                                if pxy == 0:
+                                    if ((glyphIndex >> GetClampedPosIndex(ix, iy - 1)) & 1) != 0:
+                                        blendFactor += 0.4
+                                    else:
+                                        blendFactor -= 0.4
+                                elif pxy == pixelSize - 1:
+                                    if ((glyphIndex >> GetClampedPosIndex(ix, iy + 1)) & 1) != 0:
+                                        blendFactor += 0.4
+                                    else:
+                                        blendFactor -= 0.4
                             
-                            if pxy == 0:
-                                if ((glyphIndex >> GetClampedPosIndex(ix, iy - 1)) & 1) != 0:
-                                    blendFactor += 0.4
-                                else:
-                                    blendFactor -= 0.4
-                            elif pxy == pixelSize - 1:
-                                if ((glyphIndex >> GetClampedPosIndex(ix, iy + 1)) & 1) != 0:
-                                    blendFactor += 0.4
-                                else:
-                                    blendFactor -= 0.4
+                                # Clamp the blending factor after tweaking
+                                blendFactor = ClampFloat(blendFactor, 0.0, 1.0)
                             
-                            blendFactor = ClampFloat(blendFactor, 0.0, 1.0)
                             
                             glyphAtlas[px, py] = [
                                 np.interp(blendFactor, blendXp, [sampleA[0], sampleB[0]]),
@@ -141,7 +149,10 @@ for ih in range(64):
 # Flip the image both vertically and horizontally
 glyphAtlas = glyphAtlas.transpose(1, 0, 2)
 
-cv2.imwrite('mc_glyph\\test.png', glyphAtlas)
+cv2.imwrite('mc_glyph\\example_resource\\assets\\minecraft\\textures\\font\\test.png', glyphAtlas)
+
+resPath = 'C:\\Users\\DevBo\\AppData\\Roaming\\.minecraft\\resourcepacks'
+cv2.imwrite(f'{resPath}\\mc_glyph\\assets\\minecraft\\textures\\font\\test.png', glyphAtlas)
 
 '''
 chars = '' #=========================================== E000 TO E7FF

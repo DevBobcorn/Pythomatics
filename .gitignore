@@ -4,6 +4,9 @@ web/list.txt
 web/list+.txt
 web/list-.txt
 
+# ignore mc resource files
+mc_atlas/assets
+
 # ignore manim generated files...
 manim/media
 manim/__pycache__
