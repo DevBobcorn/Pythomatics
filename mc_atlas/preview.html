@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Glyph Preview</title>
+        <style type="text/css">
+            .title {
+                font-family:'Courier New', Courier, monospace;
+                background: linear-gradient(45deg, tan, brown);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                
+                margin-left: 0.5em;
+            }
+
+            #item_container {
+                margin: 1em;
+            }
+
+            .cell {
+                align-content: center;
+                display: inline-block;
+                width: 13em;
+
+                margin-right:  1em;
+                margin-bottom: 1em;
+
+                padding-bottom: 1em;
+
+                border-radius:    0.5em;
+                border-width:     0.2em;
+                border-color:     tan;
+                border-style:    double;
+                background-color: #faebd7;
+            }
+
+            .cell:hover {
+                background-color: #fff0dc;
+            }
+
+            .cell-glyph-frame {
+                display: inline-block;
+                position: relative;
+
+                margin: 1em;
+
+                width:  64px;
+                height: 64px;
+
+                border-width:  0.1em;
+                border-color:  tan;
+                border-style: dashed;
+            }
+
+            .cell-glyph-frame:hover {
+                border-color: chocolate;
+            }
+
+            .cell-glyph {
+                position: absolute;
+
+                width:  16px;
+                height: 16px;
+
+                left: 24px;
+                top:  24px;
+
+                background: url("./mc_atlas.png");
+                scale: 200%;
+                image-rendering: pixelated;
+            }
+
+            .cell-code {
+                display: inline-block;
+                position: relative;
+                
+                font-family: 'Courier New', Courier, monospace;
+                color: tan;
+                line-height: 1.5em;
+
+                vertical-align: top;
+                margin: 1em;
+            }
+
+            .cell-code:hover {
+                color: chocolate;
+                cursor: pointer;
+            }
+
+            .cell-desc {
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 0.8em;
+                font-weight: bold;
+                color: tan;
+
+                padding-left: 1em;
+                padding-right: 0.5em;
+                margin-top: 0;
+                margin-bottom: 0;
+                overflow: hidden;
+            }
+
+            .cell-desc:hover {
+                cursor: default;
+            }
+        </style>
+        <script>
+            function refreshGlyphList(dictText) {
+                var container = document.querySelector('#item_container');
+                var dict = JSON.parse(dictText);
+
+                for (let key in dict) {
+                    const newCell = document.createElement('span');
+                    newCell.classList.add('cell');
+
+                    var info = dict[key];
+
+                    newCell.innerHTML =
+                        `<div class="cell-glyph-frame">
+                            <span class="cell-glyph" border="0" style="background-position: -${info.x}px -${info.y}px;">
+                        </div>
+                        <p class="cell-code"><strong>U+${info.code.toUpperCase()}</strong><br>\\u${info.code}</p>
+                        <p class="cell-desc">${info.desc}</p>`
+
+                    container.appendChild(newCell);
+                }
+            }
+
+            fetch('mc_atlas_dict.json')
+                .then(function(response) {
+                    return response.text();
+                })
+                .then(function(dictText) {
+                    //console.log(dictText);
+                    refreshGlyphList(dictText);
+                });
+            
+        </script>
+    </head>
+    <body>
+        <div>
+            <div>
+                <h1 class="title">Glyph Preview</h1>
+            </div>
+            <div id="item_container"></div>
+        </div>
+    </body>
+</html>

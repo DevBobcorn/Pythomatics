@@ -65,7 +65,7 @@ mapping = GetMapping()
 
 savePath = 'C:\\Users\\DevBo\\AppData\\Roaming\\.minecraft\\saves\\FONTEST\\datapacks'
 
-with open(f'{savePath}\\mc_glyph\\example_data\\data\\glyph_image\\functions\\test.mcfunction', 'w+') as f:
+with open(f'{savePath}\\mc_glyph\\data\\glyph_image\\functions\\test.mcfunction', 'w+') as f:
     for i in range(unitCntY):
         a = "tellraw @a {\"text\":\""
         for j in range(unitCntX):
