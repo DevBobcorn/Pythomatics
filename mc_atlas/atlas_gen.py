@@ -30,6 +30,7 @@ recolor_dict = {
     'minecraft:block/acacia_leaves': (119, 171, 47),
     'minecraft:block/jungle_leaves': (119, 171, 47),
     'minecraft:block/dark_oak_leaves': (119, 171, 47),
+    'minecraft:block/vine': (119, 171, 47),
 }
 
 skip_list = []
