@@ -25,6 +25,20 @@ imgcnt = 0
 # Image count until last page
 lastimgcnt = 0
 
+dlPath = 'web/downloaded'
+
+def getCoverImage(idx):
+    print(f'Grabbing cover for collection #{idx}...')
+
+    resp = requests.get(f"{root}/UploadFile/pic/{idx}.jpg", stream=True, proxies=proxies)
+    resp.encoding = resp.apparent_encoding
+
+    if resp.status_code == 200: # Ready
+        with open(fr'{dlPath}/covers/{idx}.jpg', 'wb') as f:
+            f.write(resp.content)
+    else:
+        raise Exception(f"Failed to grab cover for collection #{idx}. Error Code: {resp.status_code}")
+
 def getImage(url):
     global curidx, imgcnt
 
@@ -32,7 +46,7 @@ def getImage(url):
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200: # Ready
-        with open(fr'downloaded/{curidx}/{imgcnt}.jpg', 'wb') as f:
+        with open(fr'{dlPath}/{curidx}/{imgcnt}.jpg', 'wb') as f:
             f.write(resp.content)
     else:
         raise Exception(f"Failed to grab image from {url}. Error Code: {resp.status_code}")
@@ -45,14 +59,18 @@ def getCollection(idx):
     lastimgcnt = 0
 
     print(f'Collection #{idx} starts...')
+
+    # Grab the collection cover
+    if not os.path.exists(f"{dlPath}/covers"): # Create the directory for storing cover images
+        os.makedirs(f"{dlPath}/covers")
     
-    if not os.path.exists(fr"downloaded/{idx}"): # Create the directory for storing images
-        os.makedirs(fr"downloaded/{idx}")
+    if not os.path.exists(f"{dlPath}/{idx}"): # Create the directory for storing images
+        os.makedirs(f"{dlPath}/{idx}")
         # First search the index page, and get links to the rest of current collection
         getPage(f"{folder}{idx}.html")
     else: # Look for download_info.json if the folder presents
-        if os.path.exists(fr"downloaded/{idx}/download_info.json"):
-            with open(fr'downloaded/{idx}/download_info.json', 'r+') as f:
+        if os.path.exists(f"{dlPath}/{idx}/download_info.json"):
+            with open(f'{dlPath}/{idx}/download_info.json', 'r+') as f:
                 print(f'Restoring download process for collection #{idx}.')
                 infotxt = f.read()
                 jsonObj = json.loads(infotxt)
@@ -136,9 +154,20 @@ def getPage(path):
             print("Main content cannot be found!")
     else:
         raise Exception(f"Error Code: {resp.status_code}")
-        
 
-with open(r'list.txt') as f:
+
+idx = 1938
+
+while idx < 10001:
+    try:
+        getCoverImage(idx)
+        time.sleep(0.4 + random.random())
+        idx += 1
+    except Exception as e:
+        print(f'Exception occurred while getting cover for #{idx}: {e} Retrying...')
+
+'''
+with open(r'web\list.txt') as f:
     lnz = f.readlines()
     collecount = 0
 
@@ -164,15 +193,17 @@ with open(r'list.txt') as f:
         try:
             getCollection(idx)
         except Exception as e:
+            print(f"Un4tun8ly, the download process is interrupted: {e}")
+
             # Dump current info
             jsonObj = json.dumps({
                 'current_index': curidx,
                 'links': lnx,
                 'image_count_till_last_page': lastimgcnt
             })
-            with open(fr'downloaded/{idx}/download_info.json', 'w+') as f:
+            with open(f'{dlPath}/{idx}/download_info.json', 'w+') as f:
                 f.write(jsonObj)
-
-            print(f"Un4tun8ly, the download process is interrupted: {e}")
-            print(fr"Download info of this collection can be found here: downloaded/{curidx}/download_info.json")
+            
+            print(f"Download info of this collection can be found here: downloaded/{curidx}/download_info.json")
             break
+'''
