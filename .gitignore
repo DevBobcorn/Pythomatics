@@ -11,6 +11,7 @@ web/list-.txt
 # ignore mc resource files
 mc_atlas/assets
 mc_glyph/glyph_mapping.json
+mc_glyph/bad_apple.mp4
 
 # ignore manim generated files...
 manim/media

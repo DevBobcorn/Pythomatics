@@ -30,61 +30,98 @@ def GetMapping():
     
     return mapping
 
-def GetGlyphPoints(ix: int, iy: int):
-    if iy == 0:
-        return [(ix, iy)]
-    if iy == 2:
-        return [(ix, iy + 1)]
-    
-    # Otherwise iy is 1
-    return [(ix, iy), (ix, iy + 1)]
+mapping = GetMapping()
 
-sourceImagePath = 'mc_glyph\\apple-140-87.png'
-
-# Load the source image
-source = cv2.imread(sourceImagePath)
-
-srch, srcw, srcc = source.shape # Height, Width and Channels
+cap = cv2.VideoCapture(r'mc_glyph/bad_apple.mp4')
 
 unitw = 4
 unith = 4
 
-srcw = srcw - (srcw % unitw)
-srch = srch - (srch % unith)
+step = 1
 
-unitCntX = int(srcw / unitw)
-unitCntY = int(srch / unith)
+width  = 136
+height =  88
 
-codes = [[0 for i in range(unitCntX)] for j in range(unitCntY)]
+unitCntX = int(width  / unitw)
+unitCntY = int(height / unith)
 
-for uy in range(unitCntY):
-    for ux in range(unitCntX):
-        xpos = ux * unitw
-        ypos = uy * unith
-        for iy in range(4):
-            for ix in range(4):
-                posIndex = iy * 4 + ix
+time = -1
+cnt = 0
 
-                px = xpos + ix
-                py = ypos + iy
-                    
-                # Sample the color on source image at (px, py)
-                if source[py, px][0] > 127:
-                    codes[uy][ux] = codes[uy][ux] | (1 << posIndex)
+tpf = 1 # Tick per frame
+
+start = 0
+limit = 10000
+
+outPath = 'C:/Users/DevBo/AppData/Roaming/.minecraft/saves/FONTEST/datapacks/mc_glyph/data/glyph_image/functions'
+
+def getCallCommand(tick, frame):
+    return f'execute if score @p play_tick matches {tick} run function glyph_image:f/{frame}\n'
+
+# Output clear up function
+emptyCode = getCodeForIndex(0)
+emptyLine = ''
+
+for ux in range(unitCntX):
+    emptyLine += emptyCode
+
+with open(f'{outPath}/core/clear.mcfunction', 'w+') as f:
+    f.write('scoreboard objectives remove play_tick\n')
+
+    for uy in range(unitCntY):
+        f.write(f'tellraw @a "{emptyLine}"\n')
+
+# Output video function
+with open(f'{outPath}/core/tick.mcfunction', 'w+') as script:
+    while True:
+        time += 1
         
-        #print(f"{hex(codes[uy][ux])}"[2:].zfill(3), end = ' ')
-    #print()
+        # Get a frame
+        ret, image = cap.read()
+        
+        if (image is None) or (cnt > limit):
+            break
 
-mapping = GetMapping()
+        flag = (time % step) == 0
 
-savePath = 'C:\\Users\\DevBo\\AppData\\Roaming\\.minecraft\\saves\\FONTEST\\datapacks\\mc_glyph'
+        if flag and time >= start: # Use this frame, otherwise skip
+            cnt += 1 # Increase frame count
+            print(f'Generating frame {cnt}')
+            
+            image = cv2.resize(image, (width, height))
 
-with open(f'{savePath}\\data\\glyph_image\\functions\\test.mcfunction', 'w+') as f:
-    for i in range(unitCntY):
-        a = "tellraw @a {\"text\":\""
-        for j in range(unitCntX):
-            a += mapping[codes[i][j]]
+            frameChanged = False
 
-        a += "\"}\n"
+            tickCnt = cnt * tpf
 
-        f.write(a)
+            # Register this frame
+            script.write(getCallCommand(tickCnt, cnt))
+
+            # Output this frame
+            with open(f'{outPath}/f/{tickCnt}.mcfunction', 'w+') as f:
+                for uy in range(unitCntY):
+                    command = 'tellraw @a "'
+
+                    for ux in range(unitCntX):
+                        xpos = ux * unitw
+                        ypos = uy * unith
+
+                        glyphIdx = 0
+
+                        for iy in range(unith):
+                            for ix in range(unitw):
+                                posIndex = iy * 4 + ix
+                                px = xpos + ix
+                                py = ypos + iy
+                                    
+                                # Sample the color on source image at (px, py)
+                                if image[py, px][0] > 127:
+                                    glyphIdx = glyphIdx | (1 << posIndex)
+                        
+                        command += getCodeForIndex(glyphIdx)
+                    
+                    command += '"\n'
+                    f.write(command)
+
+    script.write('execute if score @p play_tick matches 0.. run scoreboard players add @p play_tick 1\n')
+    script.write(f'execute if score @p play_tick matches {cnt * tpf + 10}.. run scoreboard players add @p play_tick 1')
