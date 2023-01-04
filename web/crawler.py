@@ -155,8 +155,9 @@ def getPage(path):
     else:
         raise Exception(f"Error Code: {resp.status_code}")
 
+os.chdir('../')
 
-idx = 1938
+idx = 5650
 
 while idx < 10001:
     try:

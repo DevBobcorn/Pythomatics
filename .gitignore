@@ -2,8 +2,9 @@
 build/
 dist/
 
-# ignore downloaded files...
+# ignore download files...
 web/downloaded
+web/cats
 web/list.txt
 web/list+.txt
 web/list-.txt
