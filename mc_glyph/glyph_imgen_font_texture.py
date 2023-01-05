@@ -125,7 +125,5 @@ for ih in range(texPerLine):
 # Flip the image both vertically and horizontally
 glyphAtlas = glyphAtlas.transpose(1, 0, 2)
 
-cv2.imwrite('mc_glyph\\example_resource\\assets\\minecraft\\textures\\font\\test.png', glyphAtlas)
-
 resPath = 'C:\\Users\\DevBo\\AppData\\Roaming\\.minecraft\\resourcepacks'
 cv2.imwrite(f'{resPath}\\mc_glyph\\assets\\minecraft\\textures\\font\\test.png', glyphAtlas)
