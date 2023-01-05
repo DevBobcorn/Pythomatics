@@ -16,7 +16,7 @@ proxies = {
     'https': r'http://localhost:19180'
 }
 
-curidx = 0
+curColPath = '' # Current collection page path
 lnx = {}
 
 # Current image count
@@ -40,38 +40,38 @@ def getCoverImage(idx):
         raise Exception(f"Failed to grab cover for collection #{idx}. Error Code: {resp.status_code}")
 
 def getImage(url):
-    global curidx, imgcnt
+    global curColPath, imgcnt
 
     resp = requests.get(url, stream=True, proxies=proxies)
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200: # Ready
-        with open(fr'{dlPath}/{curidx}/{imgcnt}.jpg', 'wb') as f:
+        with open(fr'{dlPath}/{curColPath}/{imgcnt}.jpg', 'wb') as f:
             f.write(resp.content)
     else:
         raise Exception(f"Failed to grab image from {url}. Error Code: {resp.status_code}")
 
-def getCollection(idx):
-    global lnx, imgcnt, curidx
-    curidx = idx  # Set current processing collection index
+def getCollection(colPath):
+    global lnx, imgcnt, curColPath
+    curColPath = colPath  # Set current processing collection index
     lnx.clear()   # Reset links dictionary
     imgcnt = 0    # Reset image count
     lastimgcnt = 0
 
-    print(f'Collection #{idx} starts...')
+    print(f'Collection #{colPath} starts...')
 
     # Grab the collection cover
     if not os.path.exists(f"{dlPath}/covers"): # Create the directory for storing cover images
         os.makedirs(f"{dlPath}/covers")
     
-    if not os.path.exists(f"{dlPath}/{idx}"): # Create the directory for storing images
-        os.makedirs(f"{dlPath}/{idx}")
+    if not os.path.exists(f"{dlPath}/{colPath}"): # Create the directory for storing images
+        os.makedirs(f"{dlPath}/{colPath}")
         # First search the index page, and get links to the rest of current collection
-        getPage(f"{folder}{idx}.html")
+        getPage(f"{folder}{colPath}.html")
     else: # Look for download_info.json if the folder presents
-        if os.path.exists(f"{dlPath}/{idx}/download_info.json"):
-            with open(f'{dlPath}/{idx}/download_info.json', 'r+') as f:
-                print(f'Restoring download process for collection #{idx}.')
+        if os.path.exists(f"{dlPath}/{colPath}/download_info.json"):
+            with open(f'{dlPath}/{colPath}/download_info.json', 'r+') as f:
+                print(f'Restoring download process for collection #{colPath}.')
                 infotxt = f.read()
                 jsonObj = json.loads(infotxt)
 
@@ -81,14 +81,14 @@ def getCollection(idx):
                 lastimgcnt = imgcnt = int(jsonObj['image_count_till_last_page'])
                 print(f'lastimgcnt restored to {lastimgcnt}')
 
-            if f"{folder}{idx}.html" in lnx.keys() and lnx[f"{folder}{idx}.html"]:
+            if f"{folder}{colPath}.html" in lnx.keys() and lnx[f"{folder}{colPath}.html"]:
                 print("Landing page already collected, skip...")
             else:
-                getPage(f"{folder}{idx}.html")
+                getPage(f"{folder}{colPath}.html")
                 
         else:
             # First search the index page, and get links to the rest of current collection
-            getPage(f"{folder}{idx}.html")
+            getPage(f"{folder}{colPath}.html")
     
     for lnk, vis in lnx.items():
         if not vis:
@@ -130,7 +130,7 @@ def getPage(path):
             for img in cont.findAll(name='img'):
                 # For each image element
                 imgcnt += 1
-                print(f"Grabbing [{curidx}:{imgcnt}] {img.attrs['src']}", end='')
+                print(f"Grabbing [{curColPath}:{imgcnt}] {img.attrs['src']}", end='')
                 # Sleep for a short period of time so that we ain't gonna be blocked
                 time.sleep(0.2 + random.random())
                 print('...')
@@ -167,7 +167,7 @@ while idx < 10001:
     except Exception as e:
         print(f'Exception occurred while getting cover for #{idx}: {e} Retrying...')
 
-'''
+
 with open(r'web\list.txt') as f:
     lnz = f.readlines()
     collecount = 0
@@ -198,13 +198,12 @@ with open(r'web\list.txt') as f:
 
             # Dump current info
             jsonObj = json.dumps({
-                'current_index': curidx,
+                'current_index': curColPath,
                 'links': lnx,
                 'image_count_till_last_page': lastimgcnt
             })
             with open(f'{dlPath}/{idx}/download_info.json', 'w+') as f:
                 f.write(jsonObj)
             
-            print(f"Download info of this collection can be found here: downloaded/{curidx}/download_info.json")
+            print(f"Download info of this collection can be found here: downloaded/{curColPath}/download_info.json")
             break
-'''

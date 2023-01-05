@@ -1,4 +1,4 @@
-import json
+import json, shutil
 
 cats = [
     'XiuRen',   'MFStar',   'MiStar',   'MyGirl',
@@ -9,13 +9,18 @@ cats = [
     'HuaYang',  'XingYan',  'XiaoYu'
 ]
 
-col2cat = [ ]
+col2cat  = [ ]
+col2desc = [ ]
+col2page = [ ]
+
 listLen = 13000
 
-latestColIdx = 0
+latestCoverIdx = 0
 
-for colName in range(listLen):
+for i in range(listLen):
     col2cat.append(-1)
+    col2desc.append('')
+    col2page.append('')
 
 for catIdx in range(len(cats)):
     cat = cats[catIdx]
@@ -26,32 +31,41 @@ for catIdx in range(len(cats)):
         catText = f.read()
         catDict = json.loads(catText)
 
-        for colName in catDict: # For each collection
-            #print(f'{str(colName).rjust(7)} {catDict[colName]}')
-
+        for coverImgIdx in catDict: # For each collection
             # Remove duplicate leading category names in page url, and getting only
             # the collection index number  (only to deal with a few exceptions)
-            colIdx = int(colName.lower().replace(leadingCatNameLower, '').replace('/', ''))
+            colIdx = int(coverImgIdx)
 
-            if colIdx > latestColIdx:
-                latestColIdx = colIdx
+            if colIdx > latestCoverIdx:
+                latestCoverIdx = colIdx
     
             if colIdx > 0 and colIdx < listLen:
                 if col2cat[colIdx] != -1:
-                    print(f'Collection #{colIdx} previously registered to another category! ({cats[col2cat[colIdx]]} => {cats[catIdx]})')
+                    print(f'Collection #{colIdx} previously registered in another category! Overwriting! ({cats[col2cat[colIdx]]} => {cats[catIdx]})')
 
-                col2cat[colIdx] = catIdx
+                col2cat[colIdx]  = catIdx
+                col2desc[colIdx] = catDict[coverImgIdx]['desc']
+                col2page[colIdx] = catDict[coverImgIdx]['pageIdx']
             else:
                 print(f'Collection index out of bound: {colIdx}')
 
-'''
-for ci in range(1, latestColIdx + 1):
+targets = [ ]
+
+with open('web/list.txt', 'r') as f:
+    for ln in f.readlines():
+        targets.append(int(ln))
+
+#for ci in range(1, latestCoverIdx + 1):
+#for ci in range(8000, 9000):
+for ci in targets:
     catIdx = col2cat[ci]
 
-    catName = ''
-
     if catIdx != -1:
-        catName = cats[catIdx]
+        pageLink = f'[{cats[catIdx]}/{col2page[ci]}]'
+
+        print(f'{str(ci).rjust(5)} {pageLink.ljust(20)} {col2desc[ci].ljust(20)}')
+
+        # Clone the cover file
+        shutil.copyfile(f'web/downloaded/covers/{ci}.jpg', f'web/downloaded/selected/{ci}.jpg')
     else:
         print(f'Category for collection #{str(ci)} is unknown')
-'''

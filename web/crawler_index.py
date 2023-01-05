@@ -1,5 +1,6 @@
-import requests, base64, bs4, os, json, time, random
+import requests, base64, json, time, random
 from bs4 import BeautifulSoup
+from json import JSONEncoder
 
 # First get the full URL
 domain = f"xi{base64.b64decode('VXJl').decode('utf-8')}nb."
@@ -10,6 +11,15 @@ proxies = {
     'https': r'http://localhost:19180'
 }
 
+class CollectionInfo:
+  def __init__(self, pageIdx, desc):
+    self.pageIdx = pageIdx
+    self.desc = desc
+
+class CollectionInfoEncoder(JSONEncoder):
+    def default(self, o):
+        return o.__dict__
+
 catDictionary = { }
 
 catNames = [ ]
@@ -17,6 +27,7 @@ catNames = [ ]
 catName = 'ABCD'
 catNameLen = 0
 
+# Returns True if reached the end
 def getIndexPage(index):
     global catName, catNameLen
 
@@ -37,13 +48,16 @@ def getIndexPage(index):
 
         for item in items:
             link = item.find('a')
-            num = link.get('href')[catNameLen + 2:-5]
-            #print(f"{num} {link.get('title')}")
+            pageIdx = link.get('href')[catNameLen + 2:-5]
 
-            catDictionary[str(num)] = link.get('title')
+            coverImgIdx = item.find('img').get('src').split('/')[-1][:-4]
+
+            catDictionary[coverImgIdx] = CollectionInfo(str(pageIdx), link.get('title'))
         
         if (len(items) < 1):
-            raise Exception(f"Index page is empty!")
+            return True
+
+    return False
 
 for nm in catNames:
     print(f'Current cat: {nm}')
@@ -51,9 +65,11 @@ for nm in catNames:
     catNameLen = len(nm)
     catDictionary.clear()
 
-    for idx in range(1, 300):
+    for idx in range(1, 350):
         try:
-            getIndexPage(idx)
+            if getIndexPage(idx):
+                break
+
             time.sleep(0.4 + random.random())
             idx += 1
         except Exception as e:
@@ -61,6 +77,6 @@ for nm in catNames:
             break
 
     with open(f'web/cats/cat_dict_{catName.lower()}.json', 'w+') as f:
-        jsonObj = json.dumps(catDictionary, indent=4)
+        jsonObj = json.dumps(catDictionary, indent=4, separators=(',', ': '), cls=CollectionInfoEncoder)
 
         f.write(jsonObj)
