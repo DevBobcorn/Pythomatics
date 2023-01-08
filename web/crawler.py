@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 
 # First get the full URL
 domain = f"xi{base64.b64decode('VXJl').decode('utf-8')}nb."
-folder = base64.b64decode("L1hpdVJlbi8=").decode("utf-8")
 root = fr"https://www.{domain}vip"
 picroot = fr"https://p.{domain}top"
 
@@ -27,51 +26,47 @@ lastimgcnt = 0
 
 dlPath = 'web/downloaded'
 
-def getCoverImage(idx):
-    print(f'Grabbing cover for collection #{idx}...')
+def getCoverImage(colIndex):
+    print(f'Grabbing cover for collection #{colIndex}...')
 
-    resp = requests.get(f"{root}/UploadFile/pic/{idx}.jpg", stream=True, proxies=proxies)
+    resp = requests.get(f"{root}/UploadFile/pic/{colIndex}.jpg", stream=True, proxies=proxies)
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200: # Ready
-        with open(fr'{dlPath}/covers/{idx}.jpg', 'wb') as f:
+        with open(fr'{dlPath}/covers/{colIndex}.jpg', 'wb') as f:
             f.write(resp.content)
     else:
-        raise Exception(f"Failed to grab cover for collection #{idx}. Error Code: {resp.status_code}")
+        raise Exception(f"Failed to grab cover for collection #{colIndex}. Error Code: {resp.status_code}")
 
-def getImage(url):
+def getImage(colIndex, url):
     global curColPath, imgcnt
 
     resp = requests.get(url, stream=True, proxies=proxies)
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200: # Ready
-        with open(fr'{dlPath}/{curColPath}/{imgcnt}.jpg', 'wb') as f:
+        with open(fr'{dlPath}/{colIndex}/{imgcnt}.jpg', 'wb') as f:
             f.write(resp.content)
     else:
         raise Exception(f"Failed to grab image from {url}. Error Code: {resp.status_code}")
 
-def getCollection(colPath):
+def getCollection(colIndex, colPath):
     global lnx, imgcnt, curColPath
     curColPath = colPath  # Set current processing collection index
     lnx.clear()   # Reset links dictionary
     imgcnt = 0    # Reset image count
     lastimgcnt = 0
 
-    print(f'Collection #{colPath} starts...')
-
-    # Grab the collection cover
-    if not os.path.exists(f"{dlPath}/covers"): # Create the directory for storing cover images
-        os.makedirs(f"{dlPath}/covers")
+    print(f'Collection {colPath} starts...')
     
-    if not os.path.exists(f"{dlPath}/{colPath}"): # Create the directory for storing images
-        os.makedirs(f"{dlPath}/{colPath}")
+    if not os.path.exists(f"{dlPath}/{colIndex}"): # Create the directory for storing images
+        os.makedirs(f"{dlPath}/{colIndex}")
         # First search the index page, and get links to the rest of current collection
-        getPage(f"{folder}{colPath}.html")
+        getPage(colIndex, f"{colPath}.html")
     else: # Look for download_info.json if the folder presents
-        if os.path.exists(f"{dlPath}/{colPath}/download_info.json"):
-            with open(f'{dlPath}/{colPath}/download_info.json', 'r+') as f:
-                print(f'Restoring download process for collection #{colPath}.')
+        if os.path.exists(f"{dlPath}/{colIndex}/download_info.json"):
+            with open(f'{dlPath}/{colIndex}/download_info.json', 'r+') as f:
+                print(f'Restoring download process for collection #{colIndex} ({colPath})...')
                 infotxt = f.read()
                 jsonObj = json.loads(infotxt)
 
@@ -81,27 +76,29 @@ def getCollection(colPath):
                 lastimgcnt = imgcnt = int(jsonObj['image_count_till_last_page'])
                 print(f'lastimgcnt restored to {lastimgcnt}')
 
-            if f"{folder}{colPath}.html" in lnx.keys() and lnx[f"{folder}{colPath}.html"]:
+            if f"{colPath}.html" in lnx.keys() and lnx[f"{colPath}.html"]:
                 print("Landing page already collected, skip...")
             else:
-                getPage(f"{folder}{colPath}.html")
+                getPage(colIndex, f"{colPath}.html")
                 
         else:
             # First search the index page, and get links to the rest of current collection
-            getPage(f"{folder}{colPath}.html")
+            getPage(colIndex, f"{colPath}.html")
     
     for lnk, vis in lnx.items():
         if not vis:
-            getPage(lnk)
+            getPage(colIndex, lnk)
     print(f"Collection complete: {len(lnx)} pages searched. {imgcnt} images found.\n")
 
-def getPage(path):
+def getPage(colIndex, path):
     global lnx, imgcnt, lastimgcnt
 
     # Update last image count
     lastimgcnt = imgcnt;
 
-    resp = requests.get(f"{root}{path}", proxies=proxies)
+    print(f'Gettin page {root} => {path}')
+
+    resp = requests.get(f'{root}{path}', proxies=proxies)
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200:
@@ -134,7 +131,7 @@ def getPage(path):
                 # Sleep for a short period of time so that we ain't gonna be blocked
                 time.sleep(0.2 + random.random())
                 print('...')
-                getImage(f"{root}{img.attrs['src']}")
+                getImage(colIndex, f"{root}{img.attrs['src']}")
             
             # Sleep for a short period of time so that we ain't gonna be blocked
             time.sleep(0.5 + random.random())
@@ -182,7 +179,6 @@ cats = [
 ]
 
 col2cat  = [ ]
-col2desc = [ ]
 col2page = [ ]
 
 listLen = 13000
@@ -191,7 +187,6 @@ latestCoverIdx = 0
 
 for i in range(listLen):
     col2cat.append(-1)
-    col2desc.append('')
     col2page.append('')
 
 # Load all the category mappings
@@ -217,24 +212,19 @@ for catIdx in range(len(cats)):
                     print(f'Collection #{colIdx} previously registered in another category! Overwriting! ({cats[col2cat[colIdx]]} => {cats[catIdx]})')
 
                 col2cat[colIdx]  = catIdx
-                col2desc[colIdx] = catDict[coverImgIdx]['desc']
                 col2page[colIdx] = catDict[coverImgIdx]['pageIdx']
             else:
                 print(f'Collection index out of bound: {colIdx}')
 
-ci = 1
+ci = 2
 
 while ci < 20001:
         try:
             catIdx = col2cat[ci]
 
             if catIdx != -1:
-                pageLink = f'[{cats[catIdx]}/{col2page[ci]}]'
-
-                print(f'{str(ci).rjust(5)} {pageLink.ljust(20)} {col2desc[ci].ljust(20)}')
-
                 # Get this collection
-                getCollection(ci)
+                getCollection(ci, f'/{cats[catIdx]}/{col2page[ci]}')
 
                 # Clone the cover file
                 #shutil.copyfile(f'web/downloaded/covers/{ci}.jpg', f'web/downloaded/selected/{ci}.jpg')
