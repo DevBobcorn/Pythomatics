@@ -76,6 +76,9 @@ def getCollection(colIndex, colPath):
                 lastimgcnt = imgcnt = int(jsonObj['image_count_till_last_page'])
                 print(f'lastimgcnt restored to {lastimgcnt}')
 
+            # Delete it
+            os.remove(f"{dlPath}/{colIndex}/download_info.json")
+
             if f"{colPath}.html" in lnx.keys() and lnx[f"{colPath}.html"]:
                 print("Landing page already collected, skip...")
             else:
@@ -83,7 +86,9 @@ def getCollection(colIndex, colPath):
                 
         else:
             # First search the index page, and get links to the rest of current collection
-            getPage(colIndex, f"{colPath}.html")
+            #getPage(colIndex, f"{colPath}.html")
+            print("Collection is present... skipping...")
+            return
     
     for lnk, vis in lnx.items():
         if not vis:
@@ -216,33 +221,34 @@ for catIdx in range(len(cats)):
             else:
                 print(f'Collection index out of bound: {colIdx}')
 
-ci = 2
+ci = 3
 
 while ci < 20001:
-        try:
-            catIdx = col2cat[ci]
+    try:
+        catIdx = col2cat[ci]
 
-            if catIdx != -1:
-                # Get this collection
-                getCollection(ci, f'/{cats[catIdx]}/{col2page[ci]}')
+        if catIdx != -1:
+            # Get this collection
+            getCollection(ci, f'/{cats[catIdx]}/{col2page[ci]}')
 
-                # Clone the cover file
-                #shutil.copyfile(f'web/downloaded/covers/{ci}.jpg', f'web/downloaded/selected/{ci}.jpg')
-            else:
-                print(f'Category for collection #{str(ci)} is unknown')
-                
-                
-        except Exception as e:
-            print(f"Un4tun8ly, the download process is interrupted: {e}")
-
-            # Dump current info
-            jsonObj = json.dumps({
-                'current_index': curColPath,
-                'links': lnx,
-                'image_count_till_last_page': lastimgcnt
-            })
-            with open(f'{dlPath}/{ci}/download_info.json', 'w+') as f:
-                f.write(jsonObj)
+            # Clone the cover file
+            #shutil.copyfile(f'web/downloaded/covers/{ci}.jpg', f'web/downloaded/selected/{ci}.jpg')
+        else:
+            print(f'Category for collection #{str(ci)} is unknown')
+        
+        ci += 1
             
-            print(f"Download info of this collection can be found here: downloaded/{curColPath}/download_info.json")
-            break
+    except Exception as e:
+        print(f"Un4tun8ly, the download process is interrupted: {e}")
+
+        # Dump current info
+        jsonObj = json.dumps({
+            'current_index': curColPath,
+            'links': lnx,
+            'image_count_till_last_page': lastimgcnt
+        })
+        with open(f'{dlPath}/{ci}/download_info.json', 'w+') as f:
+            f.write(jsonObj)
+        
+        print(f"Download info of this collection can be found here: {dlPath}/{ci}/download_info.json")
+        #break
