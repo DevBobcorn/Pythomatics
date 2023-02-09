@@ -4,6 +4,7 @@ dist/
 
 # ignore download files...
 web/downloaded
+web/archive
 web/cats
 web/list.txt
 web/list+.txt
@@ -14,6 +15,7 @@ mc_atlas/assets
 mc_glyph/glyph_mapping.json
 mc_glyph/bad_apple.mp4
 mc_cloud/bad_apple.mp4
+mc_lyric/lyrics
 
 # ignore manim generated files...
 manim/media
