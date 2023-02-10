@@ -56,22 +56,53 @@ offset = 0
 i = 0
 j = 0
 
+indexOffset = 65536
+
 atlas_dict = { }
 
 root_path = f'{os.getcwd()}/mc_atlas'
 res_path = f'{os.getcwd()}/mc_atlas/assets'
 
 class TextureInfo:
-  def __init__(self, idx, x, y, code, desc):
+  def __init__(self, idx, x, y, desc):
     self.index = idx
     self.x = x
     self.y = y
-    self.code = code
+    self.code = getCodeForIndex(idx)
+    self.codePoint = getCodePointForIndex(idx)
     self.desc = desc
 
 class TextureInfoEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__
+
+def getUpperHalf(c):
+    return int(((c - 0x10000) - (c % 0x400)) / 0x400) + 0xd800
+
+def getLowerHalf(c):
+    return (c % 0x400) + 0xdc00
+
+def getCodeForIndex(index: int): # index range: [0, 65536)
+    if index < 0x1900: # index range [0, 6400)
+        # Use Unicode Private Use Area U+E000 to U+F8FF (6400 code points)
+        return f'\\u{((hex(index + 0xe000))[2:]).zfill(4)}'
+    elif index < 71934: # index range [6400, 71934)
+        # Use Unicode Private Use Area-A U+F0000 to U+FFFFD (65534 code points)
+        codePoint = 0xf0000 + (index - 0x1900)
+        return f'\\u{hex(getUpperHalf(codePoint))[2:]}\\u{hex(getLowerHalf(codePoint))[2:]}'
+    else: # Treat as 0
+        return '\\ue000'
+
+def getCodePointForIndex(index: int): # index range: [0, 65536)
+    if index < 0x1900: # index range [0, 6400)
+        # Use Unicode Private Use Area U+E000 to U+F8FF (6400 code points)
+        return f'{str(hex(index + 0xe000))}'
+    elif index < 71934: # index range [6400, 71934)
+        # Use Unicode Private Use Area-A U+F0000 to U+FFFFD (65534 code points)
+        codePoint = 0xf0000 + (index - 0x1900)
+        return f'{str(hex(codePoint))[2:]}'
+    else: # Treat as 0
+        return 'e000'
 
 namespaces = os.listdir(res_path)
 for nspath in namespaces:
@@ -110,10 +141,10 @@ for nspath in namespaces:
                 print(f'Recoloring {texname}')
                 tex = recolor(tex, recolor_dict[texname])
 
-            index = j * lncnt + i
+            index = j * lncnt + i + indexOffset
 
             # Store its information
-            info = TextureInfo(index, i * rct, j * rct, f'e{str(hex(index))[2:].zfill(3)}', path[pathLen:-4])
+            info = TextureInfo(index, i * rct, j * rct, path[pathLen:-4])
             atlas_dict[texname] = info
 
             # Paste it onto the atlas

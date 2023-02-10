@@ -16,6 +16,7 @@ mc_glyph/glyph_mapping.json
 mc_glyph/bad_apple.mp4
 mc_cloud/bad_apple.mp4
 mc_lyric/lyrics
+mc_lyric/__pycache__
 
 # ignore manim generated files...
 manim/media
