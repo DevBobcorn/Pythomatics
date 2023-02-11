@@ -1,4 +1,4 @@
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageStat
 import os, glob, json
 from json import JSONEncoder
 
@@ -45,6 +45,14 @@ def recolor(srci, col):
     #rec.show()
     return rec
 
+def getTranspMeanColor(im):
+    color = ImageStat.Stat(im).mean
+    r = round(color[0])
+    g = round(color[1])
+    b = round(color[2])
+    a = round(color[3])
+    return [r,g,b,a]
+
 size = 1024
 rct = 16
 lncnt = int(size / rct) # How many textures in a line
@@ -64,13 +72,14 @@ root_path = f'{os.getcwd()}/mc_atlas'
 res_path = f'{os.getcwd()}/mc_atlas/assets'
 
 class TextureInfo:
-  def __init__(self, idx, x, y, desc):
+  def __init__(self, idx, x, y, desc, color):
     self.index = idx
     self.x = x
     self.y = y
     self.code = getCodeForIndex(idx)
     self.codePoint = getCodePointForIndex(idx)
     self.desc = desc
+    self.color = color
 
 class TextureInfoEncoder(JSONEncoder):
     def default(self, o):
@@ -144,7 +153,7 @@ for nspath in namespaces:
             index = j * lncnt + i + indexOffset
 
             # Store its information
-            info = TextureInfo(index, i * rct, j * rct, path[pathLen:-4])
+            info = TextureInfo(index, i * rct, j * rct, path[pathLen:-4], getTranspMeanColor(tex))
             atlas_dict[texname] = info
 
             # Paste it onto the atlas
