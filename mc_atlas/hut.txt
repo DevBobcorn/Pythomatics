@@ -1,0 +1,21 @@
+# ASCII:
+======Minecraft======
+  XX     A    
+ XXXX   WWW   
+ XXXX  AAAAA  
+  QL   LWOWL  
+   L   SSSSS  
+GGGGGGGDDDDDGG
+DDDDDDDDDDDDDD
+# CHARS:
+
+Space minecraft:block/glass
+A minecraft:block/acacia_planks
+W minecraft:block/oak_planks
+L minecraft:block/oak_log
+X minecraft:block/oak_leaves
+O minecraft:block/glass
+S minecraft:block/cobblestone
+G minecraft:block/grass_block_side
+D minecraft:block/dirt
+Q minecraft:item/apple

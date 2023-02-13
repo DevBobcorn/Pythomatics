@@ -51,7 +51,7 @@ def getTranspMeanColor(im):
     g = round(color[1])
     b = round(color[2])
     a = round(color[3])
-    return [r,g,b,a]
+    return [ r, g, b, a ]
 
 size = 1024
 rct = 16
@@ -131,7 +131,6 @@ for nspath in namespaces:
                 continue
             
             print(f'Processing {texname}')
-            #print('\t\t\t[\"' + texname + '\"] = '+ str(offset) + ',')
             
             tex = Image.open(path).convert('RGBA')
 
@@ -164,6 +163,9 @@ for nspath in namespaces:
             if i == lncnt:
                 i = 0
                 j += 1
+
+atlasBackground = Image.new('RGBA', (size, size), (0, 0, 0, 31))
+atlas = Image.alpha_composite(atlasBackground, atlas)
 
 with open(f'{root_path}/mc_atlas_dict.json', 'w+') as f:
     data = json.dumps(atlas_dict, indent=4, separators=(',', ': '), cls=TextureInfoEncoder)

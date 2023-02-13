@@ -221,7 +221,7 @@ for catIdx in range(len(cats)):
             else:
                 print(f'Collection index out of bound: {colIdx}')
 
-ci = 3
+ci = 1201
 
 while ci < 20001:
     try:

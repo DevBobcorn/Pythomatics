@@ -1,6 +1,6 @@
 import json
 
-srcPath = 'mc_atlas/koumakann.txt'
+srcPath = 'mc_atlas/hut.txt'
 outPath = 'C:/Users/DevBo/AppData/Roaming/.minecraft/saves/23_06AppleShot/datapacks/mc_glyph/data/glyph_image/functions'
 
 def main():
@@ -23,14 +23,16 @@ def main():
                     else:
                         print(f'Invalid mode switch: {srcLine}, mode remains unchanged')
                 else: # Data
-                    srcLine = srcLine.rstrip()
-
-                    if srcLine == '': # Skip empty lines
-                        continue
-
                     if mode == 1:
+                        srcLine = srcLine.replace('\n', '')
+
                         asciiLines.append(srcLine)
                     elif mode == 2:
+                        srcLine = srcLine.rstrip()
+
+                        if srcLine == '': # Skip empty lines
+                            continue
+                        
                         charData = srcLine.split(' ')
                         charKey = charData[0] # Ascii character
                         charValue = charData[1] # Glyph resource location
@@ -47,6 +49,7 @@ def main():
                 
             resultLines = [ ]
 
+            '''
             for asciiLine in asciiLines:
                 resultLine = ''
 
@@ -54,7 +57,18 @@ def main():
                     if c in charMap.keys():
                         resultLine += charMap[c]
                     else:
-                        print(f'[{c}] is not defined in character map')
+                        #print(f'[{c}] is not defined in character map')
+                        resultLine += c
+                
+                resultLines.append(resultLine)
+            '''
+
+            # 14 7 30 19 (+16 +12) 4 * (+4 +3)
+            for ll in range(19):
+                resultLine = ''
+
+                for c in range(30):
+                    resultLine += '\\ue000' # charMap['Q']
                 
                 resultLines.append(resultLine)
             
@@ -64,7 +78,7 @@ def main():
 
             #print(command)
 
-            with open(f'{outPath}/prev.mcfunction', 'w+') as f:
+            with open(f'{outPath}/next4.mcfunction', 'w+') as f:
                 f.write(command)
 
 if __name__ == '__main__':
