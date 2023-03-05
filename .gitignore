@@ -5,7 +5,6 @@ dist/
 # ignore download files...
 web/downloaded
 web/archive
-web/cats
 web/list.txt
 web/list+.txt
 web/list-.txt
@@ -25,3 +24,6 @@ manim/__pycache__
 fileproc/res
 fileproc/src
 fileproc/tmp
+
+ocr
+generated

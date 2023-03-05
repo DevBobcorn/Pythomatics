@@ -11,6 +11,8 @@ proxies = {
     'https': r'http://localhost:19180'
 }
 
+updatingFromExistingData = True
+
 class CollectionInfo:
   def __init__(self, pageIdx, desc):
     self.pageIdx = pageIdx
@@ -22,7 +24,14 @@ class CollectionInfoEncoder(JSONEncoder):
 
 catDictionary = { }
 
-catNames = [ ]
+catNames = [
+    'XiuRen',   'MFStar',   'MiStar',   'MyGirl',
+    'Imiss',    'BoLoli',   'YouWu',    'Uxing',
+    'MiiTao',   'FeiLin',   'WingS',    'Taste',
+    'LeYuan',   'HuaYan',   'DKGirl',   'MintYe',
+    'YouMi',    'Candy',    'MTMeng',   'Micat',
+    'HuaYang',  'XingYan',  'XiaoYu'
+]
 
 catName = 'ABCD'
 catNameLen = 0
@@ -46,13 +55,22 @@ def getIndexPage(index):
         ful = BeautifulSoup(resp.text, features="html.parser")
         items = ful.find_all('li', class_='list_n2')
 
+        updateComplete = False
+
         for item in items:
             link = item.find('a')
             pageIdx = link.get('href')[catNameLen + 2:-5]
 
             coverImgIdx = item.find('img').get('src').split('/')[-1][:-4]
 
-            catDictionary[coverImgIdx] = CollectionInfo(str(pageIdx), link.get('title'))
+            if updatingFromExistingData and coverImgIdx in catDictionary.keys():
+                updateComplete = True
+            else:
+                catDictionary[coverImgIdx] = CollectionInfo(str(pageIdx), link.get('title'))
+                print(f'New entry updated for {catName}: [{coverImgIdx}] {pageIdx}')
+        
+        if updateComplete:
+            return True
         
         if (len(items) < 1):
             return True
@@ -60,12 +78,22 @@ def getIndexPage(index):
     return False
 
 for nm in catNames:
-    print(f'Current cat: {nm}')
+    print(f'Updating cat: {nm}...')
     catName = nm
     catNameLen = len(nm)
     catDictionary.clear()
 
-    for idx in range(1, 350):
+    if updatingFromExistingData:
+        with open(f'web/cats/cat_dict_{catName.lower()}.json', 'r+') as f:
+            jsonText = f.read()
+            jsonObj = json.loads(jsonText)
+
+            for coverImgIdx in jsonObj:
+                info = jsonObj[coverImgIdx]
+                catDictionary[coverImgIdx] = CollectionInfo(info['pageIdx'], info['desc'])
+
+    
+    for idx in range(1, 1000):
         try:
             if getIndexPage(idx):
                 break
@@ -75,8 +103,9 @@ for nm in catNames:
         except Exception as e:
             print(f'Exception occurred while getting index page #{idx}: {e}')
             break
+    
 
-    with open(f'web/cats/cat_dict_{catName.lower()}.json', 'w+') as f:
+    with open(f'web/cats_updated/cat_dict_{catName.lower()}.json', 'w+') as f:
         jsonObj = json.dumps(catDictionary, indent=4, separators=(',', ': '), cls=CollectionInfoEncoder)
 
         f.write(jsonObj)
