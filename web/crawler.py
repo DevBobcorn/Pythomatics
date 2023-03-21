@@ -1,4 +1,4 @@
-import requests, base64, bs4, os, json, time, random, sys, shutil
+import requests, base64, bs4, os, json, time, random, sys, shutil, datetime
 from bs4 import BeautifulSoup
 
 # Ignore ssl hostname matching check (uncomment to enable if necessary)
@@ -26,7 +26,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 3501
+ci = 5401
 
 dlPath = f'{dlroot}downloaded'
 
@@ -199,14 +199,16 @@ def getPage(chunkFolder, colIndex, path):
             for img in cont.findAll(name='img'):
                 # For each image element
                 imgcnt += 1
-                print(f"Grabbing [{curColPath}:{imgcnt}] {img.attrs['src']}", end='')
+                print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Grabbing [{curColPath}:{imgcnt}] {img.attrs['src']}", end='')
                 # Sleep for a short period of time so that we ain't gonna be blocked
                 for i in range(random.randint(3, 10)):
                     print('.', end='')
                     sys.stdout.flush()
                     time.sleep(0.1)
-                print('') # New line
+
+                stampStart = time.time()
                 getImage(chunkFolder, colIndex, f"{root}{img.attrs['src']}")
+                print(f'{(time.time() - stampStart) * 1000:.0f}ms') # Print download time and start new line
 
         # All images collected, mark as visited(or add into the dictionary if
         # it is not yet present)
