@@ -26,7 +26,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 5401
+ci = 7050
 
 dlPath = f'{dlroot}downloaded'
 
@@ -199,7 +199,7 @@ def getPage(chunkFolder, colIndex, path):
             for img in cont.findAll(name='img'):
                 # For each image element
                 imgcnt += 1
-                print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Grabbing [{curColPath}:{imgcnt}] {img.attrs['src']}", end='')
+                print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Grabbing [{curColPath}:{imgcnt}]", end='')
                 # Sleep for a short period of time so that we ain't gonna be blocked
                 for i in range(random.randint(3, 10)):
                     print('.', end='')
@@ -220,7 +220,7 @@ def getPage(chunkFolder, colIndex, path):
             for lnk in navc.findAll(name='a'):
                 if 'href' in lnk.attrs.keys() and lnk.attrs['href'].lower() not in lnx:
                     lnx[lnk.attrs['href'].lower()] = False
-                    print('New link found: ' + lnk.attrs['href'])
+                    #print('New link found: ' + lnk.attrs['href'])
         else:
             print("Main content cannot be found!")
     else:
