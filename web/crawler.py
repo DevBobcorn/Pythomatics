@@ -16,7 +16,7 @@ proxies = {
 }
 
 curColPath = '' # Current collection page path
-lnx = {}
+lnx = { }
 
 # Current image count
 imgcnt = 0
@@ -26,7 +26,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 7050
+ci = 9380
 
 dlPath = f'{dlroot}downloaded'
 
