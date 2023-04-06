@@ -26,7 +26,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 9380
+ci = 10001
 
 dlPath = f'{dlroot}downloaded'
 
@@ -91,7 +91,7 @@ def markImage(mark, image):
     
     with open(fr'{dlPath}/marks.json', 'w+', encoding='utf-8') as f:
         f.write(json.dumps(marksObj, indent=4, separators=(',', ': ')))
-        print(marksObj)
+        #print(marksObj)
 
 def getImage(chunkFolder, colIndex, url):
     global curColPath, imgcnt
