@@ -26,7 +26,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 10001
+ci = 12101
 
 dlPath = f'{dlroot}downloaded'
 
@@ -302,7 +302,7 @@ while ci <= latestCoverIdx:
 
         if catIdx != -1:
             # Get this collection
-            getCollection(getChunkFolder(ci), ci, f'/{cats[catIdx]}/{col2page[ci]}'.lower())
+            #getCollection(getChunkFolder(ci), ci, f'/{cats[catIdx]}/{col2page[ci]}'.lower())
 
             '''
             fdd = f'{dlPath}/{getChunkFolder(ci)}/{ci}'

@@ -1,4 +1,4 @@
-import requests, base64, json, time, random
+import requests, base64, json, time, random, os
 from bs4 import BeautifulSoup
 from json import JSONEncoder
 
@@ -7,8 +7,8 @@ domain = f"xi{base64.b64decode('VXJl').decode('utf-8')}nb."
 root = fr"https://www.{domain}vip"
 
 proxies = {
-    'http': r'http://localhost:19180',
-    'https': r'http://localhost:19180'
+#    'http': r'http://localhost:19180',
+#    'https': r'http://localhost:19180'
 }
 
 updatingFromExistingData = True
@@ -26,7 +26,7 @@ catDictionary = { }
 
 catNames = [
     'XiuRen',   'MFStar',   'MiStar',   'MyGirl',
-    'Imiss',    'BoLoli',   'YouWu',    'Uxing',
+    'IMiss',    'BoLoli',   'YouWu',    'Uxing',
     'MiiTao',   'FeiLin',   'WingS',    'Taste',
     'LeYuan',   'HuaYan',   'DKGirl',   'MintYe',
     'YouMi',    'Candy',    'MTMeng',   'Micat',
@@ -59,7 +59,13 @@ def getIndexPage(index):
 
         for item in items:
             link = item.find('a')
-            pageIdx = link.get('href')[catNameLen + 2:-5]
+
+            pageHref = link.get('href')
+
+            if (pageHref.startswith(f'/{catName}/')): 
+                pageIdx = link.get('href')[catNameLen + 2:-5]
+            else:
+                pageIdx = pageHref
 
             coverImgIdx = item.find('img').get('src').split('/')[-1][:-4]
 
@@ -77,11 +83,16 @@ def getIndexPage(index):
 
     return False
 
+cancel = False
+
 for nm in catNames:
     print(f'Updating cat: {nm}...')
     catName = nm
     catNameLen = len(nm)
     catDictionary.clear()
+
+    if (os.path.exists(f'web/cats_updated/cat_dict_{catName.lower()}.json')):
+        print(f'Skip updating {catName}')
 
     if updatingFromExistingData:
         with open(f'web/cats/cat_dict_{catName.lower()}.json', 'r+') as f:
@@ -102,7 +113,12 @@ for nm in catNames:
             idx += 1
         except Exception as e:
             print(f'Exception occurred while getting index page #{idx}: {e}')
+
+            cancel = True
             break
+    
+    if cancel:
+        break
     
 
     with open(f'web/cats_updated/cat_dict_{catName.lower()}.json', 'w+') as f:
