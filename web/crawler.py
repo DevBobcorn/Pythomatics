@@ -26,7 +26,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 12501
+ci = 13001
 
 dlPath = f'{dlroot}downloaded'
 
