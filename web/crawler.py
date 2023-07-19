@@ -277,52 +277,22 @@ for catIdx in range(len(cats)):
 print(f'Total count: {latestCoverIdx}')
 
 while ci <= latestCoverIdx:
-    '''
-    try:
-        catIdx = col2cat[ci]
-
-        #if not os.path.exists(f"{dlPath}/covers/{ci}.jpg"):
-        #    getCoverImage(ci)
-        #    time.sleep(0.4 + random.random())
-        
-        if catIdx != -1:
-            if not os.path.exists(f"{dlPath}/metaInfo/{ci}.txt"):
-                getMetaInfo(ci, f'/{cats[catIdx]}/{col2page[ci]}')
-                time.sleep(0.4 + random.random())
-        else:
-            print(f'Category for collection #{str(ci)} is unknown')
-        
-        ci += 1
-    except Exception as e:
-        print(f'Exception occurred while processing #{ci}: {e} Retrying...')
-
-    '''
     try:
         catIdx = col2cat[ci]
 
         if catIdx != -1:
             # Get this collection
             getCollection(getChunkFolder(ci), ci, f'/{cats[catIdx]}/{col2page[ci]}'.lower())
+            
+            # Get collection cover
+            #if not os.path.exists(f"{dlPath}/covers/{ci}.jpg"):
+            #    getCoverImage(ci)
+            #    time.sleep(0.4 + random.random())
 
-            '''
-            fdd = f'{dlPath}/{getChunkFolder(ci)}/{ci}'
-
-            if not os.path.exists(fdd) or not os.path.exists(f'{fdd}/4.jpg'):
-                ci += 1
-                continue
-
-            size1 = os.path.getsize(f'{fdd}/1.jpg')
-            size4 = os.path.getsize(f'{fdd}/4.jpg')
-
-            if size1 == size4:
-                print(f'ERROR: 1, 4 {cats[catIdx]} {col2page[ci]}')
-                #shutil.rmtree(fdd)
-                #fdd_copy = f'{dlPath}/copy/{ci}'
-                #shutil.copytree(fdd, fdd_copy)
-            '''
-
-            # Clone the cover file
-            #shutil.copyfile(f'{dlPath}/covers/{ci}.jpg', f'{dlPath}/selected/{ci}.jpg')
+            # Get collection meta info
+            #if not os.path.exists(f"{dlPath}/metaInfo/{ci}.txt"):
+            #    getMetaInfo(ci, f'/{cats[catIdx]}/{col2page[ci]}')
+            #    time.sleep(0.4 + random.random())
         else:
             print(f'Category for collection #{str(ci)} is unknown')
         
