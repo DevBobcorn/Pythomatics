@@ -65,11 +65,21 @@ def getMetaInfo(colIndex, colPath):
         ful = BeautifulSoup(resp.text, features="html.parser")
         bod = ful.body
 
-        item1 = bod.find(name='div',attrs={'class':'item_title'})
-        item2 = bod.find(name='div',attrs={'class':'item_info'})
+        item1 = bod.find(name='div',attrs={'class':'jianjie'}).text
+        item2 = 'someone'
+        for span in bod.find(name='div',attrs={'class':'item_info'}).find_all(name='span'):
+            if span.parent.name == 'a':
+                item2 = span.text
+                #print(f"[{item1}] <{item2}>")
+                break
+        
+        jsonObj = json.dumps({
+            'intro': item1,
+            'a_name': item2,
+        }, indent=4, separators=(',', ': '))
 
-        with open(fr'{dlPath}/metaInfo/{colIndex}.txt', 'w+', encoding='utf-8') as f:
-            f.write(f'{item1}\n{item2}')
+        with open(fr'{dlPath}/metaInfo/{colIndex}.json', 'w+', encoding='utf-8') as f:
+            f.write(jsonObj)
     else:
         raise Exception(f"Failed to grab meta info for collection #{colIndex}. Error Code: {resp.status_code}")
 
@@ -290,7 +300,7 @@ while ci <= latestCoverIdx:
             #    time.sleep(0.4 + random.random())
 
             # Get collection meta info
-            #if not os.path.exists(f"{dlPath}/metaInfo/{ci}.txt"):
+            #if not os.path.exists(f"{dlPath}/metaInfo/{ci}.json"):
             #    getMetaInfo(ci, f'/{cats[catIdx]}/{col2page[ci]}')
             #    time.sleep(0.4 + random.random())
         else:
@@ -300,6 +310,7 @@ while ci <= latestCoverIdx:
             
     except Exception as e:
         print(f"Un4tun8ly, the download process is interrupted: {e}")
+        # Enable only when getting collections, comment out otherwise
         dumpCurrentInfo(ci)
         print(f"Download info of this collection is dumped under the collection folder")
         #break
