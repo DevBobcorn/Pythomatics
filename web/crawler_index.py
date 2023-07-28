@@ -121,7 +121,7 @@ for nm in catNames:
         break
     
 
-    with open(f'web/cats_updated/cat_dict_{catName.lower()}.json', 'w+') as f:
-        jsonObj = json.dumps(catDictionary, indent=4, separators=(',', ': '), cls=CollectionInfoEncoder)
+    with open(f'web/cats/cat_dict_{catName.lower()}.json', 'w+') as f:
+        jsonObj = json.dumps({int(x):catDictionary[x] for x in catDictionary.keys()}, indent=4, separators=(',', ': '), cls=CollectionInfoEncoder, sort_keys=True)
 
         f.write(jsonObj)
