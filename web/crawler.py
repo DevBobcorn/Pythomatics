@@ -11,9 +11,11 @@ root = fr"https://www.{domain}vip"
 picroot = fr"https://p.{domain}top"
 
 proxies = {
-    #'http': r'http://localhost:19180',
-    #'https': r'http://localhost:19180'
+    'http': r'http://localhost:7890',
+    'https': r'http://localhost:7890'
 }
+
+requests.packages.urllib3.disable_warnings()
 
 curColPath = '' # Current collection page path
 lnx = { }
@@ -26,7 +28,7 @@ lastimgcnt = 0
 
 dlroot = 'web/'
 os.chdir('../')
-ci = 13001
+ci = 13550
 
 dlPath = f'{dlroot}downloaded'
 
@@ -46,7 +48,7 @@ def dumpCurrentInfo(colIndex):
 def getCoverImage(colIndex):
     print(f'Grabbing cover for collection #{colIndex}...')
 
-    resp = requests.get(f"{root}/UploadFile/pic/{colIndex}.jpg", stream=True, proxies=proxies)
+    resp = requests.get(f"{root}/UploadFile/pic/{colIndex}.jpg", verify=False, stream=True, proxies=proxies)
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200: # Ready
@@ -106,7 +108,7 @@ def markImage(mark, image):
 def getImage(chunkFolder, colIndex, url):
     global curColPath, imgcnt
 
-    resp = requests.get(url, stream=True, proxies=proxies)
+    resp = requests.get(url, verify=False, stream=True, proxies=proxies)
     resp.encoding = resp.apparent_encoding
 
     if resp.status_code == 200: # Ready
@@ -313,4 +315,3 @@ while ci <= latestCoverIdx:
         # Enable only when getting collections, comment out otherwise
         dumpCurrentInfo(ci)
         print(f"Download info of this collection is dumped under the collection folder")
-        #break
